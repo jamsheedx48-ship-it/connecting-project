@@ -1,0 +1,54 @@
+/* Main container */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background-color: #000;
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: 20px;
+  overflow-y: auto;
+}
+
+/* Sidebar title */
+.sidebar h4 {
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* Sidebar buttons */
+.sidebar button {
+  width: 90%;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  transition: 0.3s ease-in-out;
+  margin: 2px;
+}
+
+/* Hover effect */
+.sidebar button:hover {
+  background-color: #00c4ff !important;
+  color: #000;
+}
+/* Active sidebar button */
+.sidebar button.active {
+  background-color: #00c4ff;  /* Change button color when active */
+  color: #000;                 /* Text color */
+}
+
+
+
+/* Main content area */
+.admin-content {
+  padding: 25px;
+}
+
+.admin-content h2 {
+  margin-bottom: 20px;
+}
+/* Sidebar buttons (NavLink) */
+
+
+

@@ -1,0 +1,70 @@
+/* === Common form container === */
+.auth-container {
+  width: 380px;
+  margin: 80px auto;
+  padding: 30px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0px 4px 18px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Page title */
+.auth-container h2,
+.auth-container h1 {
+  margin-bottom: 25px;
+  color: #2c3e50;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+/* === Input fields === */
+.auth-container input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.auth-container input:focus {
+  border-color: #111;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* === Button === */
+.auth-container button {
+  width: 100%;
+  padding: 12px;
+  background: #111;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.auth-container button:hover {
+  background: #333;
+}
+
+/* Link text */
+.auth-container small {
+  color: #555;
+}
+
+.auth-container span {
+  color: #111;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-container p {
+  margin-top: 15px;
+}

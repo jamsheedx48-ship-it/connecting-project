@@ -1,0 +1,17 @@
+.detailsimg{
+   width: 100%;
+   max-width: 400px;
+   border-radius: 15px;
+   
+  
+    
+}
+.details-container{
+  margin: 50px;
+  padding: 10px 20px;
+}
+.Details-btn{
+    margin-top: 20px;
+    display: flex;
+    gap: 9px;
+}

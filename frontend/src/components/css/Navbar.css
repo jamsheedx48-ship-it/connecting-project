@@ -1,0 +1,72 @@
+.navbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    padding: 15px;
+    /* position: sticky; */
+    top: 0;
+    background: white;
+    box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, 0.3);
+
+
+}
+
+.navlogo{
+    display: flex;
+    margin-left: 20px;
+   
+}
+.navlogo img{
+    width: 50px;
+}
+.navitems{
+    display: flex;
+    list-style: none;
+    cursor: pointer;
+    transition: 0.2s;
+    gap: 60px;
+    font-size: 15px;
+    margin-top: 12px;
+    
+    
+}
+.navitems li:hover{
+    color: #555;
+}
+li{
+    cursor: pointer;
+  transition: 0.2s;
+}
+.login-cart{
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-right: 20px;
+    
+}
+.btnlogin{
+    font-size: 15px;
+    width: 116px;
+    height: 32px;
+    background: #111;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+    
+}
+.cartimg{
+     width: 32px;
+    height: 32px;
+}
+.navitems a{
+    text-decoration: none;
+    color: inherit;
+}
+.cart-count{
+    position: relative;
+    right: 40px;
+}

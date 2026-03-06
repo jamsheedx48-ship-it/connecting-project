@@ -1,0 +1,29 @@
+.product-img{
+  height: 500px;         
+  width: 100%;
+  object-fit: cover;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+
+
+/* Card hover effect */
+.card:hover {
+  transform: translateY(-5px);
+  transition: transform 0.3s ease;
+}
+
+/* Change title color on hover */
+.card-title:hover {
+  color: #007bff;
+  cursor: pointer;
+}
+.card .btn {
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.card .btn:hover {
+  background-color: #343a40cc; /* slight transparency */
+  transform: scale(1.05);
+}

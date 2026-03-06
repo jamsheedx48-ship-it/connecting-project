@@ -1,0 +1,167 @@
+/* ------------------ Page Header & Typography ------------------ */
+.cart-page-container h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.text-muted {
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+/* ------------------ Cart Card ------------------ */
+.cart-card {
+    margin: 1.5rem auto;
+    max-width: 900px;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    overflow: hidden;
+    padding: 0; /* clean row layout */
+}
+
+.cart-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.cart-card .row {
+    align-items: center;
+    margin: 0;
+}
+
+/* ------------------ Image Column ------------------ */
+.cart-image-column {
+    padding: 15px;
+    background-color: #fcfcfc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Image wrapper with fixed height and centering */
+.cart-img-wrapper {
+    width: 100%;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+/* Product image: maintain full visibility */
+.cartimg {
+    object-fit: contain;
+    max-width: 95%;
+    max-height: 95%;
+    width: auto;
+    height: auto;
+    object-position: center;
+    display: block;
+    
+}
+
+/* ------------------ Product Details ------------------ */
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #34495e;
+}
+
+.card-body h5, .card-body p {
+    margin-bottom: 0.5rem;
+}
+
+.card-text h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2ecc71;
+    margin: 0.5rem 0 1rem 0;
+}
+
+/* ------------------ Quantity Controls ------------------ */
+.qty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.qty button {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.qty button:hover {
+    background-color: #e0e0e0;
+}
+
+.qty p {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* ------------------ Buttons & Total Price ------------------ */
+h3.total-price-text {
+    margin-top: 2rem;
+    color: #444;
+    font-weight: 600;
+}
+
+.btn {
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    transform: scale(1.03);
+}
+
+/* ------------------ Responsive Adjustments ------------------ */
+@media (max-width: 767.98px) {
+    .cart-card {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .cart-card .row > .col-md-3,
+    .cart-card .row > .col-md-9 {
+        width: 100%;
+    }
+
+    .cart-img-wrapper {
+        height: 200px;
+    }
+
+    .card-body > .row > .col:last-child {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .btn.me-2, .btn.ms-2 {
+        width: 100%;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        margin-top: 0.5rem;
+    }
+}

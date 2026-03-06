@@ -1,0 +1,12 @@
+.admin-layout {
+  display: flex;
+  width: 100%;
+  
+}
+
+.admin-content {
+  flex: 1; 
+  padding-left: 270px;
+  background-color: #f8f9fa;
+  
+}
