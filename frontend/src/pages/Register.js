@@ -2,16 +2,16 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import "./css/Reg.css"
 import { toast } from 'react-toastify'
-
+import API from '../api/axios'
 const Register = () => {
     const navigate=useNavigate()
-    const [name,setName]=useState("")
+    const [username,setUsername]=useState("")
     const [email,setEmail]=useState("")
     const [password,setPassword]=useState("")
 
-    function handleValidation(e){
+    const handleValidation= async(e)=>{
        e.preventDefault()
-     if(!name.trim()){
+     if(!username.trim()){
         alert("Enter a valid name")
         return;
      }
@@ -25,41 +25,56 @@ const Register = () => {
         return;
      }
 
-        const user={name,email,password,status:"active"}
+        const user={username,email,password}
        
-        fetch("https://json-server-ecommerce-t2t5.onrender.com/users",{
-          method:"POST",
-          headers:{
-            "Content-Type":"application/json",
-            "Accept" : "application/json",
-          },
-          body:JSON.stringify(user)
+        try{
+          const res= await API.post(
+            "/accounts/register/",
+            user
+          )
 
-        })
-        .then((res)=>res.json())
-        .then(()=>{
-          toast.success("registered succesfully")
+          toast.success("Registered successfully")
           navigate("/login")
-        })
+
+        }catch(error){
+          console.log(error.response?.data)
+
+          const err=error.response?.data
+          if(err?.email){
+            toast.error(err.email[0])
+          }
+          else if(err?.username){
+            toast.error(err.username[0])
+          }
+          else{
+            toast.error("Registration failed")
+          }
+        }
         
+        
+        
+       
+
     }
     
   return (
     <>
         <div className='auth-container'>
             <h2>Register</h2>
-        <form>
+        <form onSubmit={handleValidation}>
             
             <input 
             type='text'
             placeholder='Your Name'
+            value={username}
             required
-            onChange={(e)=>setName(e.target.value)}
+            onChange={(e)=>setUsername(e.target.value)}
             />
             <br/><br/>
             <input
             type='email'
             placeholder='Email Address'
+            value={email}
             required
             onChange={(e)=>setEmail(e.target.value)}
             />
@@ -67,12 +82,13 @@ const Register = () => {
             <input
             type='password'
             placeholder='Password'
+            value={password}
             required
             onChange={(e)=>setPassword(e.target.value)}
             />
             <br/><br/>
 
-            <button onClick={handleValidation}>Continue</button>
+            <button type='submit'>Continue</button>
             <p> <small>Already have an account?</small> <Link to="/login"><span>Login</span></Link></p>
 
 

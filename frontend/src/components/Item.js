@@ -3,6 +3,7 @@ import {Button,Card,Row,Col} from "react-bootstrap"
 import { useNavigate } from 'react-router-dom'
 import { useContext } from 'react'
 import { CartContext } from '../context/CartContext'
+import API from '../api/axios'
 const Item = () => {
   const {addTocart}=useContext(CartContext)
   const navigate=useNavigate()
@@ -11,16 +12,27 @@ const Item = () => {
     navigate(`/details/${id}`)
   }
     const [item,setItem]=useState([])
+    const [loading,setLoading]=useState(true)
     useEffect(()=>{
-    fetch("https://json-server-ecommerce-t2t5.onrender.com/products")
-    .then((res)=>res.json())
-    .then((data)=>{
-      const featured=data.filter((curr)=>(
-        curr.featured===true
-      ))
-      setItem(featured)
-    })
+    const getProducts=async ()=>{
+      try{
+        const res= await API.get("/products/")
+        const featured= res.data.filter((curr)=>curr.featured)
+        setItem(featured)
+        setLoading(false)
+
+      }catch(err){
+        console.log(err);
+        setLoading(false)
+        
+      }
+    }
+    getProducts()
     },[])
+
+    if(loading){
+  return <h3 className="text-center mt-5">Loading...</h3>
+}
   return (
     
     <div className='container my-4'>

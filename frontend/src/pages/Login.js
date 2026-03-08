@@ -2,14 +2,14 @@ import React, { useState } from 'react'
 import { useNavigate,Link } from 'react-router-dom'
 import { toast } from 'react-toastify';
 import "./css/Reg.css"
-
+import API from '../api/axios';
 
 const Login = () => {
   const navigate=useNavigate()
   const[email,setEmail]=useState("")
   const[password,setPassword]=useState("")
 
-  const LoginValidation=(e)=>{
+  const LoginValidation= async (e)=>{
    e.preventDefault()
 
    if(!email.includes("@")){ 
@@ -21,23 +21,24 @@ const Login = () => {
    return;
    }
    
-   fetch(`https://json-server-ecommerce-t2t5.onrender.com/users?email=${email}&password=${password}`)
+   try{
+    const res= await API.post(
+      "/accounts/login/",
+      {
+        email:email,
+        password:password
+      }
+    )
+    toast.success("Login successful")
+    localStorage.setItem("token",res.data.access)
+    navigate("/")
+    window.location.reload()
 
-   .then((res)=>res.json())
-   .then((data)=>{
-    const user =data[0]
-     if(user){
-       if(user.status==="blocked"){
-        toast.error("You blocked by admin")
-        return;
-       }
-      toast.success("login succes")
-      localStorage.setItem("userid",user.id)
-      navigate("/")
-     }else{
-      toast.error("incorrect email or password")
-     }
-   })
+
+   }catch(error){
+    console.log(error.response)
+    toast.error("Invalid email or password")
+   }
    
   }
 
@@ -47,12 +48,13 @@ const Login = () => {
   return (
     <>
       <div className='auth-container'>
-         <form>
+         <form onSubmit={LoginValidation}>
           <h2>Login</h2>
 
           <input
           type='email'
           placeholder='Email Address'
+          value={email}
           required
           onChange={(e)=>setEmail(e.target.value)}
           />
@@ -60,11 +62,12 @@ const Login = () => {
           <input
           type='password'
           placeholder='Password'
+          value={password}
           required
           onChange={(e)=>setPassword(e.target.value)}
           />
           <br/><br/>
-          <button onClick={LoginValidation}>Login</button>
+          <button type='submit'>Login</button>
            <p> <small>Don't have an account?</small> <Link to="/register"><span>Register</span></Link></p>
          </form>
       </div>

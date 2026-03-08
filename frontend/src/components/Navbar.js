@@ -5,16 +5,27 @@ import { useContext } from 'react'
 import { CartContext } from '../context/CartContext'
 import { Button } from 'react-bootstrap'
 import Swal from 'sweetalert2';
-
+import API from '../api/axios'
+import { toast } from 'react-toastify'
 
 const Navbar = () => {
-  const userid=localStorage.getItem("userid")
-  const [name,setName]=useState('')
+  const [userid,setUserid]=useState(localStorage.getItem("userId"))
+  const [name,setName]=useState("")
  useEffect(()=>{
-   fetch(`https://json-server-ecommerce-t2t5.onrender.com/users/${userid}`)
-  .then((res)=>res.json())
-  .then((data)=>setName(data.name))
- },[userid])
+   const token= localStorage.getItem("token")
+   if (token){
+    API.get("/accounts/user/")
+    .then((res)=>{
+      setName(res.data.username)
+      setUserid(res.data.id)
+      localStorage.setItem("userId",res.data.id)
+    })
+    .catch((err)=>{
+      console.log(err);
+      
+    })
+   }
+ },[])
   const {cart}=useContext(CartContext)
   const handleCart=()=>{
      navigate("/cart")
@@ -37,8 +48,12 @@ const Navbar = () => {
   cancelButtonText: "Cancel"
 }).then((res)=>{
   if(res.isConfirmed){
-    localStorage.removeItem("userid")
-     navigate("/")
+    localStorage.removeItem("userId")
+    localStorage.removeItem("token")
+    setUserid(null)
+    setName("")
+    navigate("/")
+    toast.success("Logout succesful")
   }
 
 })
@@ -62,11 +77,18 @@ const Navbar = () => {
         </ul>
 
         <div className='login-cart'>
-          {(userid) ?<Button variant='outline-secondary'>HI, {name}</Button> :<Button variant='outline-secondary'>Guest</Button>}
-          {!(userid)&&<button className='btnlogin' onClick={handleLogin}>Login</button>}
-          {localStorage.getItem("userid") && (
+          {userid ?(
+            <>
+            <Button variant='outline-secondary'>HI, {name}</Button>
             <button className='btnlogin' onClick={handleLogout}>Logout</button>
-              )}
+            </>
+          ):(
+            <>
+            <Button variant='outline-secondary'>Guest</Button>
+            <button className='btnlogin' onClick={handleLogin}>Login</button>
+            </>
+          )
+          }
 
           <img  className="cartimg" src="https://img.icons8.com/?size=100&id=85080&format=png&color=000000" alt='cart icon'
            onClick={handleCart}/>
