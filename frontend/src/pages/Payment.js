@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import "./css/Payment.css"
 import { toast } from 'react-toastify'
 import Swal from 'sweetalert2';
+import API from '../api/axios'
 
 const Payment = () => {
   const navigate=useNavigate()
@@ -22,22 +23,27 @@ const Payment = () => {
 
 
     useEffect(()=>{
-       fetch(`https://json-server-ecommerce-t2t5.onrender.com/orders/${orderid}`)
-    .then((res=>res.json()))
-    .then((data)=>{
-       setOrder(data)
-    })
-    .catch((err)=>console.log("error")
-    )
+      const fetchOrder= async()=>{
+        try{
+          const res= await API.get(`/orders/${orderid}/`)
+          setOrder(res.data)
+        }
+        catch(err){
+          console.log(err);
+          toast.error("Failed to load order")
+          
+        }
+      }
+      fetchOrder()
     },[orderid])
     
     if(!order)
-      return;
+      return <h3 className='text-center mt-5'>Loading...</h3>
     const handleChange=(e)=>{
       setAddress({...address,[e.target.name]:e.target.value})
     }
 
-    const handlePayment=()=>{
+    const handlePayment= async ()=>{
       
       if(!paymentMethod){
          toast.warn("Please select a payment method")
@@ -47,24 +53,28 @@ const Payment = () => {
         toast.warn("Please fill all delivery address fields")
         return;
       }
+      try{
+        await API.patch(`/orders/${orderid}/`,{
+          "status":"paid"
+        })
+        Swal.fire({
+          title: "Success!",
+          text: "Order placed",
+          icon: "success",
+         confirmButtonText: "OK"
+       })
+       .then((result)=>{
+        if(result.isConfirmed){
+          navigate(`/success/${orderid}`)
+        }
+       })
+      }
+      catch(err){
+        console.log(err)
+        toast.error("Payment failed")
         
-      fetch(`https://json-server-ecommerce-t2t5.onrender.com/orders/${orderid}`,{
-        method:"PATCH",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({status:"paid"})
-      })
-      .then(()=>(
-         navigate(`/success/${orderid}`)
-      ))
-      navigate(`/success/${orderid}`)
-      
-       Swal.fire({
-            title: "Success!",
-            text: "Order placed",
-            icon: "success",
-            confirmButtonText: "OK"
-          });
-      
+      }
+        
     
     }
   return (
@@ -74,22 +84,22 @@ const Payment = () => {
             <Col md={6} className='text-center mb-3 border border-dark-1'>
             <h4>Order Summary</h4>
            
-              {order.items.map((curr)=>
+              {order.items?.map((curr)=>
                 <div key={curr.id}>
-                  <p>Product Name : {curr.name}</p>
-                  <p>Qty : {curr.qty}</p>
+                  <p>Product Name : {curr.product_name}</p>
+                  <p>Qty : {curr.quantity}</p>
                 </div>
               )}
-              <h4>Total : {order.total}/-</h4>
+              <h4>Total : {order.total_price}/-</h4>
             </Col>
 
             <Col md={6} className='text-center mb-3 border border-dark-1'>
             <h4>Payment Method</h4>
            <div className='my-5'>
-            <input type='radio' name="one" onChange={(e)=>setPaymentMethod(e.target.value)}/> <label>Cash on delivery</label> <br/> 
-            <input type='radio' name='one' onChange={(e)=>setPaymentMethod(e.target.value)}/>  <label>Gpay</label>  <br/> 
-            <input type='radio' name='one' onChange={(e)=>setPaymentMethod(e.target.value)}/>  <label>Phonpe</label>  <br/> 
-            <input type='radio' name='one' onChange={(e)=>setPaymentMethod(e.target.value)}/>  <label>Paytm</label>  <br/>
+            <input type='radio' name="payment" onChange={(e)=>setPaymentMethod(e.target.value)} value="COD"/> <label>Cash on delivery</label> <br/> 
+            <input type='radio' name='payment' onChange={(e)=>setPaymentMethod(e.target.value)} value="GPAY"/>  <label>Gpay</label>  <br/> 
+            <input type='radio' name='payment' onChange={(e)=>setPaymentMethod(e.target.value)} value="PHONEPE"/>  <label>Phonpe</label>  <br/> 
+            <input type='radio' name='payment' onChange={(e)=>setPaymentMethod(e.target.value)} value="PAYTM"/>  <label>Paytm</label>  <br/>
           </div> 
 
            
@@ -105,6 +115,7 @@ const Payment = () => {
           name='name'
           placeholder='Name'
           required
+          value={address.name}
           onChange={handleChange}
           
           />
@@ -114,6 +125,7 @@ const Payment = () => {
           name='address'
           placeholder='Address'
           required
+          value={address.address}
           onChange={handleChange}
           
           />
@@ -123,6 +135,7 @@ const Payment = () => {
           name='state'
           placeholder='State'
           required
+          value={address.state}
           onChange={handleChange}
           
           />
@@ -132,6 +145,7 @@ const Payment = () => {
           name='city'
           placeholder='City'
           required
+          value={address.city}
           onChange={handleChange}
           
           />
@@ -141,7 +155,7 @@ const Payment = () => {
          </div>
             </Col>
              <div className='text-center'>
-              <Button variant='success' className='text-cneter' onClick={handlePayment}>Pay {order.total}/-</Button>
+              <Button variant='success' className='text-center' onClick={handlePayment}>Pay {order.total_price}/-</Button>
              </div>
         </Row>
     </div>

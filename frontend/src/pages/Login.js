@@ -31,6 +31,7 @@ const Login = () => {
     )
     toast.success("Login successful")
     localStorage.setItem("token",res.data.access)
+    localStorage.setItem("refresh",res.data.refresh)
     navigate("/")
     window.location.reload()
 

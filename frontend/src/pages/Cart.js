@@ -12,7 +12,7 @@ const Cart = () => {
     const {cart,RemoveTask,IncreaseQty,DecreaseQty,BuySingleProduct,PayForAll}=useContext(CartContext)
 
     const TotalPrice= cart.reduce((acc,curr)=>{
-   return acc=acc+curr.price*curr.qty;
+   return acc=acc+curr.price * curr.quantity;
   },0)
   return (
     <div>
@@ -31,15 +31,15 @@ const Cart = () => {
         <Col md={8} >
         <Card.Body>
         <Card.Title >{curr.name}</Card.Title>
-        <Card.Text>
+        <div className='card-text'>
           <p>{curr.type}</p>
           <h4>₹{curr.price}</h4>
           <div className='qty'>
             <button onClick={()=>DecreaseQty(curr.id)}>-</button>
-            <p>{curr.qty}</p>
+            <p>{curr.quantity}</p>
              <button onClick={()=>IncreaseQty(curr.id)}>+</button>
           </div>
-        </Card.Text >
+        </div >
         <Button variant="outline-secondary" className='me-2' onClick={()=>RemoveTask(curr.id)}>Remove</Button>
         <Button variant="success" className='ms-2' onClick={()=>BuySingleProduct(curr)}>Buy now</Button>
       </Card.Body>
@@ -50,7 +50,7 @@ const Cart = () => {
        ))}
        {!(cart.length===0)&&<h3 className='text-center'>Total price: ₹{TotalPrice}</h3>}
         <div className="d-flex justify-content-center">
-             {!(cart.length===0)&&<Button variant='success' onClick={PayForAll}>Pay for all</Button>}
+             {!(cart.length===0)&&<Button variant='success' onClick={PayForAll}>Checkout</Button>}
         </div>
       
     </div>

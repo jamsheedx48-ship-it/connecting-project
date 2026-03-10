@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import { Card,Row,Col } from 'react-bootstrap'
-
+import API from '../api/axios'
 
 const Orders = () => {
     const [orders,setOrders]=useState([])
     const userId = localStorage.getItem("userid")
     useEffect(()=>{
-       fetch(`https://json-server-ecommerce-t2t5.onrender.com/orders/?userId=${userId}`)
-       .then((res)=>res.json())
-       .then((data)=>setOrders(data))
-       .catch((err)=>console.log(err)
-       )
-    },[userId])
+      const getOrders= async ()=>{
+        try{
+          const res= await API.get("/orders/")
+          setOrders(res.data)
+        }catch(err){
+          console.log(err);
+          
+        }
+      }
+      getOrders()
+    },[])
     
   return (
     <div className='container'>
@@ -22,20 +27,20 @@ const Orders = () => {
        {orders.map((order)=>(
          <Card key={order.id} className='mb-4 p-3 shadow-sm rouned-3'>
            
-            {order.items.map((curr)=>(
-                <Row key={curr.index} className='align-items-center py-2'>
+            {order.items.map((curr,index)=>(
+                <Row key={index} className='align-items-center py-2'>
             <Col md={4}>
-            <Card.Img src={curr.image} alt={curr.name} />
+            <Card.Img src={curr.product_image} alt={curr.name} />
           
            </Col>
            <Col md={8}>
             <h5 >Order ID : <i>#{order.id}</i></h5>
-            <h5 className='fw-bold'>{curr.name}</h5>
-            <p className='text-muted mb-1'>{curr.price}*{curr.qty}</p>
+            <h5 className='fw-bold'>{curr.product_name}</h5>
+            <p className='text-muted mb-1'>{curr.price}*{curr.quantity}</p>
             <p>status:{order.status}</p> <br/>
             <div className='text-end mt-2'>
                 <h4 className='fw-bold'>
-                Total:${order.total}
+                Total:${order.total_price}
             </h4>
             </div>
            </Col>

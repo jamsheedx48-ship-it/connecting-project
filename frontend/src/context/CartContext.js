@@ -2,6 +2,7 @@ import {  createContext, useEffect, useState } from "react";
 import {  useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Swal from 'sweetalert2';
+import API from "../api/axios";
 
 export const CartContext=createContext()
 
@@ -9,208 +10,197 @@ export const CartContext=createContext()
 export const CartProvider=({children})=>{
 
     const navigate=useNavigate()
-    const userId= localStorage.getItem("userid")
+    const token= localStorage.getItem("token")
      const [cart,setCart]=useState([])
-    useEffect(()=>{
-        if(!userId) return;
 
-     fetch(`https://json-server-ecommerce-t2t5.onrender.com/cart?userId=${userId}`)
-     .then((res)=>res.json())
-     .then((data)=>setCart(data))
-},[userId])
+    useEffect(()=>{
+        if(!token)return
+        const getCart=async ()=>{
+            try{
+                const res= await API.get("/cart/")
+                setCart(res.data)
+            }
+            catch(err){
+                console.log(err);
+                setCart([])
+                
+            }
+        }
+        getCart()
+},[token])
    
 
-    const addTocart=(p)=>{
-        if(!userId){
+    const addTocart= async (product)=>{
+        if(!token){
   Swal.fire({
     title: "Error!",
     text: "Please login to continue",
     icon: "error",
     confirmButtonText: "OK"
-  });
+  })
+  .then((result)=>{
+    if(result.isConfirmed){
+        navigate("/login")
+    }
+  })
+  return
+ }
+  try{
+    const res= await API.post("/cart/add/",{
+        "product_id":product.id
+    })
 
-            navigate("/login")
-            return
+    const newItem=res.data
+    setCart(prev=>{
+        const existing = prev.find(item=>item.product===newItem.product)
+        if (existing){
+            return prev.map(item=>
+                item.product===newItem.product ? newItem : item
+            )
         }
-        toast.success("Item added to cart")
-        
-         const exist=cart.find((curr)=>curr.id===p.id)
-
-         if(exist){
-            fetch(`https://json-server-ecommerce-t2t5.onrender.com/cart/${exist.id}`,{
-                method:"PATCH",
-                headers:{"Content-Type":"application/json"},
-                body:JSON.stringify({qty:exist.qty+1})
-            })
-            
-            .then(()=>{
-               
-               setCart(prev=>
-                prev.map(curr=>
-                    curr.id===exist.id
-                    ?{...curr,qty:curr.qty+1} :curr
-
-                
-                )
-                
-               )
-            })
-            
-            
-            
-
-         }
-         else{
-            fetch("https://json-server-ecommerce-t2t5.onrender.com/cart",{
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body: JSON.stringify({
-                    ...p,
-                    qty:1,
-                    userId:userId
-                })
-            }) 
-            .then((res)=>res.json())
-            .then(newItem=>{
-                setCart(prev => [...prev, newItem]);
-            })
-         }
+        return [...prev,newItem]
+    })
+    toast.success("Item added to cart")
+    
+  }
+  catch(err){
+    console.log(err);
+    
+  }
+   
         
        
     }
 
-    const RemoveTask=(id)=>{
-        fetch(`https://json-server-ecommerce-t2t5.onrender.com/cart/${id}`,{
-            method:"DELETE"
-        })
-     .then(()=>{
-          setCart((prev)=>prev.filter((curr)=>curr.id!==id))
-     })
+    const RemoveTask= async(id)=>{
+       try{
+        await API.delete(`/cart/remove/${id}/`)
+        setCart(prev=>prev.filter(curr=>curr.id!==id))
+       }
+       catch(err){
+        console.log(err);
+        
+       }
     }
 
-    const IncreaseQty=(id)=>{
+    const IncreaseQty= async (id)=>{
       const item= cart.find((curr)=>curr.id===id)
       if(!item) return;
-       fetch(`https://json-server-ecommerce-t2t5.onrender.com/cart/${id}`,{
-            method:"PATCH",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({qty:item.qty+1})
+       try{
+        await API.patch(`/cart/update/${id}/`,{
+            "quantity":item.quantity+1
         })
+       
         setCart((prev)=>
             prev.map((curr)=>
-                curr.id===id ? {...curr, qty:curr.qty+1} :curr
+                curr.id===id ? {...curr, quantity:curr.quantity+1} :curr
             )
         )
+    }
+    catch(err){
+        console.log(err);
+        
+    } 
         
     }
 
-    const DecreaseQty=(id)=>{
+    const DecreaseQty= async (id)=>{
          const item= cart.find((curr)=>curr.id===id)
       if(!item) return;
 
-        if(item.qty===1){
-            fetch(`https://json-server-ecommerce-t2t5.onrender.com/cart/${id}`,{
-                method:"DELETE"
-            })
+        if(item.quantity===1){
+            RemoveTask(id)
+            return
         }
          
-        fetch(`https://json-server-ecommerce-t2t5.onrender.com/cart/${id}`,{
-            method:"PATCH",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({qty: item.qty-1})
-        })
+        try{
+            await API.patch(`/cart/update/${id}/`,{
+                "quantity":item.quantity-1
+            })
 
-        setCart((prev)=>
-        prev
-        .map((curr)=>
-            curr.id===id ? {...curr,qty:curr.qty-1} : curr
+            setCart(prev=>
+                prev.map(curr=>
+                    curr.id===id
+                    ? {...curr,quantity:curr.quantity-1}
+                    :curr
+                )
+            )
+        }
+        catch(err){
+            console.log(err);
+            
+        }
 
-        )
-         .filter((curr)=>curr.qty>0)
-        )
+        
 
     }
 
-    const BuySingleProduct=(product)=>{
-       
+    const BuySingleProduct= async (product)=>{
+        console.log(product);
         
-       const userId=localStorage.getItem("userid")
-
-       const OrderData={
-        userId:userId,
-        items:[product],
-        total:product.price*product.qty,
-        status:"pending",
-        date: new Date().toISOString(),
+       if (!token){
+        Swal.fire({
+            title:"Error!",
+            text:"Please login to continue",
+            icon:"error",
+            confirmButtonText: "OK"
+        })
+        .then((result)=>{
+            if(result.isConfirmed){
+                navigate('/login')
+            }
+        });
+        return;
+        
        }
 
-        if(!userId){
-            Swal.fire({
-    title: "Error!",
-    text: "Please login to continue",
-    icon: "error",
-    confirmButtonText: "OK"
-  });
-            navigate("login")
-            return;
-        }
-        
-
-       fetch("https://json-server-ecommerce-t2t5.onrender.com/orders",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify(OrderData)
-       })
-       .then((res)=>res.json())
-       .then((data)=>{
-        
-        fetch(`https://json-server-ecommerce-t2t5.onrender.com/cart/${product.id}`,{
-            method:"DELETE"
+       try{
+        const res= await API.post("/orders/buy-now/",{
+            "product_id":product.product || product.id,
+            "quantity":product.quantity
         })
-        setCart((prev)=>prev.filter((curr)=>curr.id!==product.id))
-        navigate(`/payment/${data.id}`)
-       })
-       
-    
+    setCart(prev=>prev.filter(item=>item.id!==product.id))
+        navigate(`/payment/${res.data.order_id}`)
+       }
+       catch(err){
+        console.log(err);
+        Swal.fire({
+            title:"Error!",
+            text:"Order creation failed",
+            icon:"error"
+        });
         
-       
+       }
 
-       
+
        
     }
 
-    const PayForAll=()=>{
-        const userId=localStorage.getItem("userid");
-
-        const TotalPrice=cart.reduce((acc,curr)=>{
-           return acc=acc+curr.price*curr.qty
-        },0)
-
-        const OrderData={
-            userId:userId,
-            items:cart,
-            total:TotalPrice,
-            status:"pending",
-           date: new Date().toISOString()
-        };
-
-        fetch("https://json-server-ecommerce-t2t5.onrender.com/orders",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(OrderData)
-        })
-        .then((res)=>res.json())
-        .then((data)=>{
-            cart.forEach((curr)=>{
-            fetch(`https://json-server-ecommerce-t2t5.onrender.com/cart/${curr.id}`,{
-                method:"DELETE",
+    const PayForAll= async ()=>{
+        if(!token){
+            Swal.fire({
+                title:"Error!",
+                text:"Please login to continue",
+                icon:"error"
+            }).then((result)=>{
+                if(result.isConfirmed){
+                    navigate("/login")
+                }
             })
-            setCart([]);
-            navigate(`/payment/${data.id}`)
-            })
-        })
-
-        
+            return
+        }
+        try{
+            const res=await API.post("/orders/create/")
+            const order_id=res.data.order_id
+            setCart([])
+            navigate(`/payment/${order_id}`)
+        }
+        catch(err){
+            console.log(err);
+            toast.error("Failed to create order")
+            
+        }
+   
        
     }
 
