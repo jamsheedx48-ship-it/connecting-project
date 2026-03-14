@@ -1,6 +1,7 @@
 from django.shortcuts import render,get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from accounts.permissions import IsActiveUser
 from cart.models import Cart,CartItem
 from rest_framework.response import Response
 from .models import Order,OrderItem
@@ -10,7 +11,7 @@ from .serializers import OrderSerializer
 # Create your views here.
 
 class CreateOrderView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticated,IsActiveUser]
 
     def post(self,request):
          user=request.user
@@ -20,6 +21,13 @@ class CreateOrderView(APIView):
 
          if not cart_items.exists():
               return Response({"message":"Cart is empty"})
+         
+         for item in cart_items:
+              if item.product.stock<item.quantity:
+                   return Response(
+                        {"message":f"{item.product.name} is out of stock"},
+                        status=status.HTTP_400_BAD_REQUEST
+                   )
          
          total_price=0
          order= Order.objects.create(user=user,total_price=0)
@@ -37,12 +45,10 @@ class CreateOrderView(APIView):
 
          order.total_price=total_price
          order.save()
-
-         cart_items.delete()
          return Response({"message":"Order created successfully","order_id":order.id})
         
 class BuyNowView(APIView):
-     permission_classes=[IsAuthenticated]
+     permission_classes=[IsAuthenticated,IsActiveUser]
 
      def post(self,request):
           user=request.user
@@ -55,7 +61,13 @@ class BuyNowView(APIView):
                return Response(
                     {"message":"Product not found"},
                     status=status.HTTP_404_NOT_FOUND
-               )         
+               )
+          if product.stock<quantity:
+               return Response(
+                    {"message":f"{product.name} is out of stock"},
+                    status=status.HTTP_400_BAD_REQUEST
+               )
+
           total_price=product.price*quantity
           order=Order.objects.create(
                user=user,
@@ -68,6 +80,11 @@ class BuyNowView(APIView):
                quantity=quantity,
                price=product.price
           )
+
+          cart = Cart.objects.filter(user=user).first()
+          if cart:
+               CartItem.objects.filter(cart=cart,product=product).delete()
+          
           return Response({
                "message":"Order created",
                "order_id":order.id
@@ -75,7 +92,7 @@ class BuyNowView(APIView):
 
 
 class OrderDetailView(APIView):
-     permission_classes=[IsAuthenticated]
+     permission_classes=[IsAuthenticated,IsActiveUser]
 
      def get(self,request,order_id):
           order=get_object_or_404(
@@ -92,14 +109,29 @@ class OrderDetailView(APIView):
                id=order_id,
                user=request.user
           )
+
+          if order.status == "paid":
+              return Response({"message": "Order already paid"}, status=400)
           order.status=request.data.get("status")
           order.save()
+
+          if order.status == "paid":
+               for items in order.items.all():
+                    product=items.product
+                    product.stock-=items.quantity
+                    product.save()
+
+
+               cart= Cart.objects.filter(user=request.user).first()
+               if cart:
+                   CartItem.objects.filter(cart=cart).delete()
+
           return Response({
                "message":"Order updated successfully"
           })
 
 class UserOrdersView(APIView):
-     permission_classes=[IsAuthenticated]
+     permission_classes=[IsAuthenticated,IsActiveUser]
 
      def get(self,request):
           order=Order.objects.filter(user=request.user).order_by("-id")

@@ -10,7 +10,8 @@ import { toast } from 'react-toastify'
 
 const Navbar = () => {
   const [userid,setUserid]=useState(localStorage.getItem("userId"))
-  const [name,setName]=useState("")
+  const [name,setName]=useState(localStorage.getItem("username")||"")
+  const token=localStorage.getItem('token')
  useEffect(()=>{
    const token= localStorage.getItem("token")
    if (token){
@@ -26,7 +27,8 @@ const Navbar = () => {
     })
    }
  },[])
-  const {cart}=useContext(CartContext)
+
+  const {cart,setCart}=useContext(CartContext)
   const handleCart=()=>{
      navigate("/cart")
   }
@@ -50,8 +52,10 @@ const Navbar = () => {
   if(res.isConfirmed){
     localStorage.removeItem("userId")
     localStorage.removeItem("token")
+    localStorage.removeItem("username")
     setUserid(null)
     setName("")
+    setCart([])
     navigate("/")
     toast.success("Logout succesful")
   }
@@ -77,7 +81,7 @@ const Navbar = () => {
         </ul>
 
         <div className='login-cart'>
-          {userid ?(
+          {token ?(
             <>
             <Button variant='outline-secondary'>HI, {name}</Button>
             <button className='btnlogin' onClick={handleLogout}>Logout</button>

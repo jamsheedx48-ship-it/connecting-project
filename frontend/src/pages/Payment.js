@@ -6,8 +6,12 @@ import "./css/Payment.css"
 import { toast } from 'react-toastify'
 import Swal from 'sweetalert2';
 import API from '../api/axios'
+import { useContext } from 'react'
+import { CartContext } from '../context/CartContext'
 
 const Payment = () => {
+   const {setCart}=useContext(CartContext)
+
   const navigate=useNavigate()
     const {orderid}=useParams()
     const [order,setOrder]=useState(null)
@@ -17,6 +21,7 @@ const Payment = () => {
       "address":"",
       "state":"",
       "city":"",
+      "phone":""
     })
      
 
@@ -49,7 +54,7 @@ const Payment = () => {
          toast.warn("Please select a payment method")
          return;
       }
-      if(!address.name||!address.address||!address.state||!address.city){
+      if(!address.name||!address.address||!address.state||!address.city||!address.phone){
         toast.warn("Please fill all delivery address fields")
         return;
       }
@@ -57,6 +62,9 @@ const Payment = () => {
         await API.patch(`/orders/${orderid}/`,{
           "status":"paid"
         })
+        
+        setCart([])
+        
         Swal.fire({
           title: "Success!",
           text: "Order placed",
@@ -150,6 +158,15 @@ const Payment = () => {
           
           />
           <br/><br/>
+          <input
+          type='tel'
+          name='phone'
+          placeholder='Phone'
+          required
+          value={address.phone}
+          onChange={handleChange}
+          
+          />
          
          </form>
          </div>

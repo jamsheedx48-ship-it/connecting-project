@@ -7,7 +7,7 @@ class Product(models.Model):
     type=models.CharField(max_length=100)
     price=models.DecimalField(max_digits=10,decimal_places=2)
     image=models.TextField()
-    qty=models.IntegerField(default=1)
+    stock=models.PositiveIntegerField(default=1)
     category=models.CharField(max_length=100)
     featured=models.BooleanField(default=False)
     created_at=models.DateField(auto_now_add=True)

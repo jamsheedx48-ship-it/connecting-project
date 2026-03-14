@@ -22,6 +22,7 @@ import ProtectedAdminRoute from '../admin/ProtectedAdminRoute'
 import AdminLayout from '../admin/AdminLayout'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import AuthRoute from './AuthRoute'
 
 
 const MainRoute = () => {
@@ -36,18 +37,22 @@ const MainRoute = () => {
           </>
          }/>
          <Route path='/login' element={
-          <>
-          <Navbar/>
-          <Login/>
-          <Footer/>
+          <AuthRoute>
+           <>
+            <Navbar/>
+            <Login/>
+            <Footer/>
           </>
+          </AuthRoute>
          }/>
          <Route path='/register' element={
-          <>
-          <Navbar/>
-          <Register/>
-          <Footer/>
+          <AuthRoute>
+           <>
+            <Navbar/>
+            <Register/>
+            <Footer/>
           </>
+          </AuthRoute>
          }/>
          <Route path='/products' element={
           <>

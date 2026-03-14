@@ -4,7 +4,6 @@ import API from '../api/axios'
 
 const Orders = () => {
     const [orders,setOrders]=useState([])
-    const userId = localStorage.getItem("userid")
     useEffect(()=>{
       const getOrders= async ()=>{
         try{
@@ -12,7 +11,6 @@ const Orders = () => {
           setOrders(res.data)
         }catch(err){
           console.log(err);
-          
         }
       }
       getOrders()

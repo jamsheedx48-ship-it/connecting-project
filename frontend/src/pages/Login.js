@@ -1,25 +1,29 @@
-import React, { useState } from 'react'
-import { useNavigate,Link } from 'react-router-dom'
+import React, {useState } from 'react'
+import { useNavigate,Link, } from 'react-router-dom'
 import { toast } from 'react-toastify';
 import "./css/Reg.css"
 import API from '../api/axios';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Login = () => {
   const navigate=useNavigate()
   const[email,setEmail]=useState("")
   const[password,setPassword]=useState("")
+  const[showPassword,setShowPassword]=useState(false)
 
   const LoginValidation= async (e)=>{
    e.preventDefault()
 
-   if(!email.includes("@")){ 
-   toast.error("Invalid email")
-    return;
-   }
-   if(password.length<8){
-    toast.error("Password must be at least 8 characters")
-   return;
-   }
+  const emailPattern=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailPattern.test(email)){
+    toast.error("Invalid email address")
+    return
+  }
+  
+  if(!password.trim()){
+    toast.error("Password is required")
+    return
+  }
    
    try{
     const res= await API.post(
@@ -31,14 +35,22 @@ const Login = () => {
     )
     toast.success("Login successful")
     localStorage.setItem("token",res.data.access)
-    localStorage.setItem("refresh",res.data.refresh)
+    localStorage.setItem("username",res.data.username)
     navigate("/")
     window.location.reload()
 
 
    }catch(error){
     console.log(error.response)
-    toast.error("Invalid email or password")
+    const err=error.response?.data
+
+    if(err?.non_field_errors){
+      toast.error(err.non_field_errors[0])
+      return
+    }
+    else{
+      toast.error("Login Failed")
+    }
    }
    
   }
@@ -60,14 +72,19 @@ const Login = () => {
           onChange={(e)=>setEmail(e.target.value)}
           />
           <br/><br/>
+          <div className='password-field'>
           <input
-          type='password'
+          type={showPassword ? "text":"password"}
           placeholder='Password'
           value={password}
           required
           onChange={(e)=>setPassword(e.target.value)}
           />
-          <br/><br/>
+          <span className='eye-icon' onClick={()=>setShowPassword(!showPassword)}>
+            {showPassword ? <FaEyeSlash/> : <FaEye/>}
+          </span>
+          </div>
+
           <button type='submit'>Login</button>
            <p> <small>Don't have an account?</small> <Link to="/register"><span>Register</span></Link></p>
          </form>

@@ -45,6 +45,16 @@ export const CartProvider=({children})=>{
   })
   return
  }
+   if(product.stock===0){
+     toast.warn("Out of Stock")
+     return
+   }
+   const existingItem=cart.find(item=>item.product===product.id)
+   if(existingItem && existingItem.quantity>=product.stock){
+    toast.warn("Stock limit reached")
+    return
+   }
+  
   try{
     const res= await API.post("/cart/add/",{
         "product_id":product.id
@@ -85,7 +95,12 @@ export const CartProvider=({children})=>{
 
     const IncreaseQty= async (id)=>{
       const item= cart.find((curr)=>curr.id===id)
-      if(!item) return;
+      if(!item) return
+
+      if(item.quantity>=item.stock){
+        toast.warn("Maximum stock reached")
+        return
+      }
        try{
         await API.patch(`/cart/update/${id}/`,{
             "quantity":item.quantity+1
@@ -154,6 +169,7 @@ export const CartProvider=({children})=>{
         
        }
 
+
        try{
         const res= await API.post("/orders/buy-now/",{
             "product_id":product.product || product.id,
@@ -192,7 +208,6 @@ export const CartProvider=({children})=>{
         try{
             const res=await API.post("/orders/create/")
             const order_id=res.data.order_id
-            setCart([])
             navigate(`/payment/${order_id}`)
         }
         catch(err){
@@ -206,7 +221,7 @@ export const CartProvider=({children})=>{
 
 
     return(
-        <CartContext.Provider value={{addTocart,cart,RemoveTask,IncreaseQty,DecreaseQty,BuySingleProduct,PayForAll}}>
+        <CartContext.Provider value={{addTocart,cart,RemoveTask,IncreaseQty,DecreaseQty,BuySingleProduct,PayForAll,setCart}}>
             {children}
         </CartContext.Provider>
     )

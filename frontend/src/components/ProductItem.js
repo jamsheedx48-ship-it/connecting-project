@@ -100,6 +100,9 @@ const ProductItem = () => {
                 <Card.Text>
                   ₹{curr.price}
                 </Card.Text>
+                <p style={{color: curr.stock>0 ?"green" :"red",fontWeight:"bold"}}>
+                  {curr.stock>0 ? "In Stock" : "Out of Stock"}
+                </p>
                 <Button variant="dark" onClick={()=>{addTocart(curr)}}>Add to cart</Button>
               </Card.Body>
             </Card>

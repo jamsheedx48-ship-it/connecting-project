@@ -4,6 +4,7 @@ from .serializers import RegisterSerializer,LoginSerializer,UserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from .permissions import IsActiveUser
 # Create your views here.
 
 class RegisterView(APIView):
@@ -25,7 +26,7 @@ class LoginView(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class UserView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticated,IsActiveUser]
 
     def get(self,request):
         user=request.user

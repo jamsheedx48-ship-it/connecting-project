@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from accounts.permissions import IsActiveUser
 from rest_framework.response import Response
 from products.models import Product
 from .models import Cart,CartItem
@@ -10,7 +11,7 @@ from django.shortcuts import get_object_or_404
 # Create your views here.
 
 class AddToCartView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticated,IsActiveUser]
 
     def post(self,request):
         user=request.user
@@ -33,7 +34,7 @@ class AddToCartView(APIView):
 
 
 class CartView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticated,IsActiveUser]
 
     def get(self,request):
         cart,_= Cart.objects.get_or_create(user=request.user)
@@ -44,7 +45,7 @@ class CartView(APIView):
         return Response(serializer.data)
     
 class RemoveCartItemView(APIView):
-    permission_classes=[IsAuthenticated] 
+    permission_classes=[IsAuthenticated,IsActiveUser] 
 
     def delete(self,request,id):
         try:
@@ -60,7 +61,7 @@ class RemoveCartItemView(APIView):
             )   
         
 class UpdateCartItemView(APIView):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticated,IsActiveUser]
 
     def patch(self,request,id):
         try:
@@ -73,6 +74,21 @@ class UpdateCartItemView(APIView):
                     {"message":"Quantity is required"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            quantity=int(quantity)
+            
+            if quantity>item.product.stock:
+                return Response(
+                    {"message":"Not enough stock"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if quantity<=0:
+                return Response(
+                    {"message":"Quantity must be greater than 0"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )    
+            
             item.quantity=quantity
             item.save()
             return Response(

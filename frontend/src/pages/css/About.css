@@ -1,57 +1,324 @@
-.about-container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 20px 30px;
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  line-height: 1.7;
-  font-family: Arial, sans-serif;
+/* ===============================
+   GLOBAL VARIABLES
+================================*/
+:root{
+  --primary-black:#000;
+  --soft-black:#111;
+  --dark-gray:#222;
+  --mid-gray:#555;
+  --light-gray:#eaeaea;
+  --white:#ffffff;
+
+  --transition-fast:0.25s ease;
+  --transition-smooth:0.4s cubic-bezier(.25,.8,.25,1);
+
+  --radius:10px;
+  --shadow-soft:0 8px 30px rgba(0,0,0,0.08);
+  --shadow-hover:0 20px 40px rgba(0,0,0,0.12);
 }
 
-.about-title {
-  text-align: center;
-  font-size: 2.3rem;
-  margin-bottom: 25px;
-  font-weight: 700;
-  color: #111;
+/* ===============================
+   PAGE BACKGROUND
+================================*/
+body{
+  background:#f7f7f7;
 }
 
-.about-heading {
-  font-size: 1.5rem;
-  margin-top: 30px;
-  margin-bottom: 10px;
-  color: #000;
-  font-weight: bold;
+/* subtle background pattern */
+.about-container::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:
+  radial-gradient(circle at 1px 1px,#00000010 1px,transparent 0);
+  background-size:25px 25px;
+  opacity:.4;
+  pointer-events:none;
 }
 
-.about-subheading {
-  margin-top: 10px;
-  font-weight: 600;
-  color: #333;
+/* ===============================
+   MAIN CONTAINER
+================================*/
+.about-container{
+  position:relative;
+  max-width:950px;
+  margin:70px auto;
+  padding:55px;
+  background:var(--white);
+  color:var(--soft-black);
+
+  font-family:
+  "Helvetica Neue",
+  "Inter",
+  Arial,
+  sans-serif;
+
+  line-height:1.75;
+
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-soft);
+
+  transition:var(--transition-smooth);
 }
 
-.about-text {
-  font-size: 1rem;
-  color: #444;
-  margin-bottom: 15px;
+.about-container:hover{
+  transform:translateY(-4px);
+  box-shadow:var(--shadow-hover);
 }
 
-.about-list {
-  padding-left: 20px;
-  margin-bottom: 15px;
+/* ===============================
+   TITLE
+================================*/
+.about-title{
+  font-size:40px;
+  font-weight:800;
+  text-align:center;
+  margin-bottom:35px;
+  letter-spacing:1px;
+  position:relative;
 }
 
-.about-list li {
-  margin-bottom: 6px;
-  font-size: 1rem;
-  color: #444;
+/* animated underline */
+.about-title::after{
+  content:"";
+  display:block;
+  width:80px;
+  height:3px;
+  margin:14px auto 0;
+  background:linear-gradient(
+  90deg,
+  #000,
+  #444,
+  #000
+  );
+  border-radius:2px;
+  animation:underlineGrow 1s ease forwards;
 }
 
-.about-footer {
-  margin-top: 30px;
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #111;
+@keyframes underlineGrow{
+  from{
+    width:0;
+    opacity:0;
+  }
+  to{
+    width:80px;
+    opacity:1;
+  }
+}
+
+/* ===============================
+   SECTION HEADINGS
+================================*/
+.about-heading{
+  font-size:24px;
+  font-weight:700;
+  margin-top:35px;
+  margin-bottom:12px;
+  position:relative;
+  padding-left:16px;
+}
+
+/* left accent line */
+.about-heading::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:5px;
+  width:4px;
+  height:22px;
+  background:var(--primary-black);
+  border-radius:3px;
+}
+
+/* ===============================
+   SUBHEADINGS
+================================*/
+.about-subheading{
+  font-size:15px;
+  font-weight:600;
+  color:var(--mid-gray);
+  margin-bottom:12px;
+}
+
+/* ===============================
+   PARAGRAPH TEXT
+================================*/
+.about-text{
+  font-size:16px;
+  margin-bottom:16px;
+  color:var(--dark-gray);
+}
+
+/* subtle emphasis */
+.about-text strong{
+  color:var(--primary-black);
+  font-weight:700;
+}
+
+/* ===============================
+   LIST STYLES
+================================*/
+.about-list{
+  list-style:none;
+  margin:10px 0 20px 0;
+  padding-left:0;
+}
+
+.about-list li{
+  position:relative;
+  padding-left:28px;
+  margin-bottom:10px;
+  font-size:15px;
+  color:var(--dark-gray);
+  transition:var(--transition-fast);
+}
+
+/* custom bullet */
+.about-list li::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:9px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#000;
+  transition:var(--transition-fast);
+}
+
+/* hover animation */
+.about-list li:hover{
+  transform:translateX(6px);
+  color:#000;
+}
+
+.about-list li:hover::before{
+  transform:scale(1.4);
+}
+
+/* ===============================
+   FOOTER MESSAGE
+================================*/
+.about-footer{
+  margin-top:45px;
+  padding-top:20px;
+  text-align:center;
+
+  font-size:16px;
+  font-weight:500;
+
+  border-top:1px solid var(--light-gray);
+  color:var(--dark-gray);
+
+  letter-spacing:.3px;
+}
+
+/* highlight slogan */
+.about-footer strong{
+  display:inline-block;
+  margin-top:8px;
+  font-size:18px;
+  font-weight:700;
+  letter-spacing:1px;
+}
+
+/* ===============================
+   SCROLLBAR STYLING
+================================*/
+::-webkit-scrollbar{
+  width:8px;
+}
+
+::-webkit-scrollbar-track{
+  background:#f1f1f1;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#000;
+  border-radius:10px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+  background:#444;
+}
+
+/* ===============================
+   SMOOTH FADE-IN ANIMATION
+================================*/
+.about-container{
+  animation:fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn{
+  from{
+    opacity:0;
+    transform:translateY(20px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* ===============================
+   RESPONSIVE DESIGN
+================================*/
+
+@media (max-width:900px){
+
+  .about-container{
+    padding:40px;
+    margin:50px 20px;
+  }
+
+  .about-title{
+    font-size:34px;
+  }
+
+}
+
+@media (max-width:600px){
+
+  .about-container{
+    padding:30px;
+  }
+
+  .about-title{
+    font-size:28px;
+  }
+
+  .about-heading{
+    font-size:20px;
+  }
+
+  .about-text{
+    font-size:15px;
+  }
+
+  .about-list li{
+    font-size:14px;
+  }
+
+}
+
+/* ===============================
+   EXTRA MICRO INTERACTIONS
+================================*/
+
+/* subtle text selection */
+::selection{
+  background:#000;
+  color:#fff;
+}
+
+/* link styling if added later */
+a{
+  color:#000;
+  text-decoration:none;
+  border-bottom:1px solid transparent;
+  transition:var(--transition-fast);
+}
+
+a:hover{
+  border-color:#000;
 }

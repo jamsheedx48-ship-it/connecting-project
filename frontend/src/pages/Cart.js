@@ -14,6 +14,7 @@ const Cart = () => {
     const TotalPrice= cart.reduce((acc,curr)=>{
    return acc=acc+curr.price * curr.quantity;
   },0)
+  
   return (
     <div>
        <h1 className='text-center my-5' >Your cart</h1>
@@ -37,7 +38,7 @@ const Cart = () => {
           <div className='qty'>
             <button onClick={()=>DecreaseQty(curr.id)}>-</button>
             <p>{curr.quantity}</p>
-             <button onClick={()=>IncreaseQty(curr.id)}>+</button>
+             <button onClick={()=>IncreaseQty(curr.id)} disabled={curr.quantity>=curr.stock}>+</button>
           </div>
         </div >
         <Button variant="outline-secondary" className='me-2' onClick={()=>RemoveTask(curr.id)}>Remove</Button>
