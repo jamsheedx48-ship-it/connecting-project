@@ -83,12 +83,27 @@ export const CartProvider=({children})=>{
     }
 
     const RemoveTask= async(id)=>{
+        const result= await Swal.fire({
+            title:"Remove item?",
+            text :"Do you want to remove this item from the cart?",
+            icon:"warning",
+            showCancelButton:true,
+            confirmButtonColor:"#d33",
+            cancelButtonColor:"#6c757d",
+            confirmButtonText:"Yes, remove it"
+        });
+
+        if(!result.isConfirmed){
+            return
+        }
        try{
         await API.delete(`/cart/remove/${id}/`)
         setCart(prev=>prev.filter(curr=>curr.id!==id))
+        Swal.fire("Removed!", "Item removed from cart.", "success");
        }
        catch(err){
         console.log(err);
+        Swal.fire("Error", "Failed to remove item.", "error");
         
        }
     }
@@ -151,7 +166,6 @@ export const CartProvider=({children})=>{
     }
 
     const BuySingleProduct= async (product)=>{
-        console.log(product);
         
        if (!token){
         Swal.fire({

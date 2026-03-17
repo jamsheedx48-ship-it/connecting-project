@@ -15,19 +15,55 @@ API.interceptors.request.use((req)=>{
     return req;
 })
 
-API.interceptors.response.use(
+API.interceptors.response.use(  
     (response)=>response,
-    (error)=>{
+    async (error)=>{
+        const status = error.response?.status;
         const token = localStorage.getItem("token");
-        if((error.response.status === 403||error.response.status===401)&&!logoutTriggered&&token){
+        const refresh= localStorage.getItem("refresh");
+        const originalRequest = error.config;
 
-            logoutTriggered=true;
-            localStorage.removeItem("token")
-            localStorage.removeItem("username")
-            toast.error("Your account blocked by admin")
-            window.location.href = '/login'
-            
+        if(status===401 && !originalRequest._retry && refresh){
+            originalRequest._retry= true;
+
+            try{
+                const res= await axios.post(
+                    "http://127.0.0.1:8000/api/accounts/token/refresh/",
+                    {refresh:refresh}
+                );
+
+                const newAccessToken=res.data.access;
+                localStorage.setItem("token",newAccessToken);
+
+                API.defaults.headers.Authorization= `Bearer ${newAccessToken}`;
+                originalRequest.headers.Authorization= `Bearer ${newAccessToken}`;
+
+                return API(originalRequest);
+
+            }catch(refreshError){
+                if(!logoutTriggered){
+                    logoutTriggered=true;
+                    localStorage.removeItem("token")
+                    localStorage.removeItem("refresh")
+                    localStorage.removeItem("username")
+
+                    toast.error("Session expired. Please log in again.");
+                    window.location.href = "/login";
+                }
+                return Promise.reject(refreshError)
+            }
         }
+
+        if(status===403 && !logoutTriggered && token){
+            logoutTriggered=true
+            localStorage.removeItem("token")
+            localStorage.removeItem("refresh")
+            localStorage.removeItem("username")
+
+            toast.error("Your account blocked by admin");
+            window.location.href = "/login";
+        }
+
         return Promise.reject(error)
     }
 )

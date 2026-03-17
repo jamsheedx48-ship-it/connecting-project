@@ -52,6 +52,7 @@ const Navbar = () => {
   if(res.isConfirmed){
     localStorage.removeItem("userId")
     localStorage.removeItem("token")
+    localStorage.removeItem("refresh")
     localStorage.removeItem("username")
     setUserid(null)
     setName("")

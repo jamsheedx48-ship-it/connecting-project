@@ -1,0 +1,135 @@
+/* Page */
+.order-page{
+  max-width:1100px;
+  margin:auto;
+  background:#fff;
+}
+
+/* Title */
+.orders-title{
+  font-weight:700;
+  letter-spacing:1px;
+  color:#000;
+}
+
+/* Card */
+.order-card{
+  border:1px solid #e5e5e5;
+  border-radius:6px;
+  background:#fff;
+  transition:border 0.2s ease;
+  overflow:hidden;
+}
+
+.order-card:hover{
+  border-color:#000;
+}
+
+/* Header */
+.order-card-header{
+  padding:18px 22px;
+  border-bottom:1px solid #f2f2f2;
+}
+
+/* Header top row */
+.order-header-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+/* Header bottom row */
+.order-header-bottom{
+  margin-top:8px;
+}
+
+/* Order ID */
+.order-id{
+  font-size:12px;
+  color:#888;
+  letter-spacing:0.5px;
+  margin:0;
+}
+
+/* Payment */
+.order-payment{
+  font-size:13px;
+  color:#555;
+  margin:0;
+}
+
+/* Status */
+.order-status{
+  display:inline-block;
+  padding:4px 10px;
+  font-size:11px;
+  border-radius:3px;
+  font-weight:600;
+  text-transform:uppercase;
+}
+
+/* Total */
+.order-total{
+  font-size:20px;
+  font-weight:700;
+  color:#000;
+  margin:0;
+}
+
+/* Row */
+.order-row{
+  border-bottom:1px solid #f2f2f2;
+  padding:16px 0;
+}
+
+.order-row:last-child{
+  border-bottom:none;
+}
+
+/* Image column */
+.order-img-col{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px;
+}
+
+/* Image */
+.order-product-img{
+  width:100%;
+  max-width:180px;
+  aspect-ratio:4/3;
+  object-fit:contain;
+  background:#f3f3f3;
+  border-radius:6px;
+  padding:12px;
+  display:block;
+}
+
+/* Details */
+.order-details{
+  padding-left:10px;
+}
+
+/* Product name */
+.order-product-name{
+  font-size:18px;
+  font-weight:700;
+  color:#000;
+  margin:0 0 4px;
+}
+
+/* Price */
+.order-price{
+  font-size:14px;
+  color:#444;
+  margin:0;
+}
+
+/* Empty */
+.orders-empty{
+  color:#777;
+  font-weight:500;
+}

@@ -67,7 +67,7 @@ class BuyNowView(APIView):
                     {"message":f"{product.name} is out of stock"},
                     status=status.HTTP_400_BAD_REQUEST
                )
-
+          
           total_price=product.price*quantity
           order=Order.objects.create(
                user=user,
@@ -109,26 +109,34 @@ class OrderDetailView(APIView):
                id=order_id,
                user=request.user
           )
+          old_status=order.status
+          serializer=OrderSerializer(
+               order,
+               data=request.data,
+               partial=True,
+               context={"request":request}
+          )
+          if serializer.is_valid():
+               serializer.save()
+               new_status=serializer.validated_data.get("status")
+               print(new_status)
+               print(old_status)
 
-          if order.status == "paid":
-              return Response({"message": "Order already paid"}, status=400)
-          order.status=request.data.get("status")
-          order.save()
-
-          if order.status == "paid":
-               for items in order.items.all():
-                    product=items.product
-                    product.stock-=items.quantity
-                    product.save()
+               if new_status=="processing" and old_status!="processing":
+                   for items in order.items.all():
+                        product=items.product
+                        product.stock-=items.quantity
+                        product.save()
 
 
-               cart= Cart.objects.filter(user=request.user).first()
-               if cart:
-                   CartItem.objects.filter(cart=cart).delete()
+                   cart= Cart.objects.filter(user=request.user).first()
+                   if cart:
+                       CartItem.objects.filter(cart=cart).delete()
 
-          return Response({
-               "message":"Order updated successfully"
-          })
+               return Response({
+                  "message":"Order updated successfully"
+               })
+          return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class UserOrdersView(APIView):
      permission_classes=[IsAuthenticated,IsActiveUser]
@@ -137,3 +145,25 @@ class UserOrdersView(APIView):
           order=Order.objects.filter(user=request.user).order_by("-id")
           serializer=OrderSerializer(order,many=True)
           return Response(serializer.data)
+
+class CancelOrderView(APIView):
+     permission_classes=[IsAuthenticated,IsActiveUser]
+
+     def post(self,request,order_id):
+          order=get_object_or_404(Order,id=order_id,user=request.user)
+
+          if order.status=="cancelled":
+               return Response({"error":"Order already cancelled"}) 
+          
+
+          if order.status=="delivered" or order.status=="shipped":
+               return Response({"error":"Delivered order cannot be cancelled"},status=status.HTTP_400_BAD_REQUEST)
+          
+          for items in order.items.all():
+               product=items.product
+               product.stock+=items.quantity
+               product.save()
+
+          order.status="cancelled"   
+          order.save()   
+          return Response({"message":"Order cancelled successfully"})

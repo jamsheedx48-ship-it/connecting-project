@@ -35,7 +35,11 @@ const Details = () => {
 
            <div className='Details-btn'>
             <Button variant='dark' onClick={()=>{addTocart(Details)}}>Add to cart</Button>
-            <Button variant='primary'onClick={()=>BuySingleProduct(Details)}>Buy now</Button>
+            {Details.stock>0 ? (
+              <Button variant='primary'onClick={()=>BuySingleProduct(Details)}>Buy now</Button>
+            ):(
+              <Button className='disabled'>Out of Stock</Button>
+            )}
            </div>
           </Col>
         </Row>

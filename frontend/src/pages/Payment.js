@@ -28,6 +28,7 @@ const Payment = () => {
 
 
     useEffect(()=>{
+      
       const fetchOrder= async()=>{
         try{
           const res= await API.get(`/orders/${orderid}/`)
@@ -48,19 +49,52 @@ const Payment = () => {
       setAddress({...address,[e.target.name]:e.target.value})
     }
 
+    const addressValidate=()=>{
+      if(!address.name.trim()){
+        toast.error("Name is required");
+        return false
+      }
+      if(address.name.length<3){
+        toast.error("Name must be more than 3 charcters ");
+        return false
+      }
+      if(!address.address.trim()){
+        toast.error("Address is required")
+        return false
+      }
+      if(!address.state.trim()){
+        toast.error("State is required")
+        return false
+      }
+      if(!address.city.trim()){
+        toast.error("City is required")
+        return false
+      }
+      if(!/^\d{10}$/.test(address.phone)){
+        toast.error("Enter valid 10 digit phone number")
+        return false
+      }
+      return true
+    }
+
     const handlePayment= async ()=>{
       
       if(!paymentMethod){
          toast.warn("Please select a payment method")
          return;
       }
-      if(!address.name||!address.address||!address.state||!address.city||!address.phone){
-        toast.warn("Please fill all delivery address fields")
-        return;
-      }
+      
+      if(!addressValidate())return;
+     
       try{
         await API.patch(`/orders/${orderid}/`,{
-          "status":"paid"
+          status:"pending",
+          payment_method:paymentMethod,
+          name:address.name,
+          address:address.address,
+          state:address.state,
+          city:address.city,
+          phone:address.phone
         })
         
         setCart([])
@@ -78,7 +112,7 @@ const Payment = () => {
        })
       }
       catch(err){
-        console.log(err)
+        console.log(err.response.data)
         toast.error("Payment failed")
         
       }
@@ -105,9 +139,8 @@ const Payment = () => {
             <h4>Payment Method</h4>
            <div className='my-5'>
             <input type='radio' name="payment" onChange={(e)=>setPaymentMethod(e.target.value)} value="COD"/> <label>Cash on delivery</label> <br/> 
-            <input type='radio' name='payment' onChange={(e)=>setPaymentMethod(e.target.value)} value="GPAY"/>  <label>Gpay</label>  <br/> 
-            <input type='radio' name='payment' onChange={(e)=>setPaymentMethod(e.target.value)} value="PHONEPE"/>  <label>Phonpe</label>  <br/> 
-            <input type='radio' name='payment' onChange={(e)=>setPaymentMethod(e.target.value)} value="PAYTM"/>  <label>Paytm</label>  <br/>
+            <input type='radio' name='payment' onChange={(e)=>setPaymentMethod(e.target.value)} value="UPI"/>  <label>UPI</label>  <br/> 
+            <input type='radio' name='payment' onChange={(e)=>setPaymentMethod(e.target.value)} value="CARD"/>  <label>CARD</label>  <br/> 
           </div> 
 
            
