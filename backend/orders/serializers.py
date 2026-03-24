@@ -18,7 +18,8 @@ class OrderSerializer(serializers.ModelSerializer):
         request=self.context.get("request")
 
         if request and request.method in ["PATCH","PUT"]:
-            if data.get("status")=="pending":
+            status=data.get("status") or self.instance.status
+            if status=="pending":
 
                 required_fields = ["name","address","state","city","phone"]
                 for field in required_fields:
@@ -27,6 +28,23 @@ class OrderSerializer(serializers.ModelSerializer):
                         raise serializers.ValidationError({
                             field:f"{field} is required to place order" 
                         })
+                    
+                payment_method= data.get("payment_method") or self.instance.payment_method
+                if not payment_method:
+                    raise serializers.ValidationError({
+                        "payment_method":"payment method is required"
+                    })
+                name= data.get("name") or self.instance.name
+                if len(name)<3:
+                    raise serializers.ValidationError({
+                        "name":"Name must be at least 3 characters"
+                    })
+                phone= data.get("phone") or self.instance.phone
+                if not phone.isdigit() or len(phone)!=10:
+                    raise serializers.ValidationError({
+                        "phone":"Invalid phone number"
+                    })
+
         return data           
 
 

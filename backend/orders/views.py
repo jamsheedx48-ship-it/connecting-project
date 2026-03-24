@@ -109,7 +109,6 @@ class OrderDetailView(APIView):
                id=order_id,
                user=request.user
           )
-          old_status=order.status
           serializer=OrderSerializer(
                order,
                data=request.data,
@@ -118,24 +117,10 @@ class OrderDetailView(APIView):
           )
           if serializer.is_valid():
                serializer.save()
-               new_status=serializer.validated_data.get("status")
-               print(new_status)
-               print(old_status)
-
-               if new_status=="processing" and old_status!="processing":
-                   for items in order.items.all():
-                        product=items.product
-                        product.stock-=items.quantity
-                        product.save()
-
-
-                   cart= Cart.objects.filter(user=request.user).first()
-                   if cart:
-                       CartItem.objects.filter(cart=cart).delete()
-
                return Response({
-                  "message":"Order updated successfully"
+                    "message":"Order updated succesfully"
                })
+               
           return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class UserOrdersView(APIView):
@@ -159,10 +144,6 @@ class CancelOrderView(APIView):
           if order.status=="delivered" or order.status=="shipped":
                return Response({"error":"Delivered order cannot be cancelled"},status=status.HTTP_400_BAD_REQUEST)
           
-          for items in order.items.all():
-               product=items.product
-               product.stock+=items.quantity
-               product.save()
 
           order.status="cancelled"   
           order.save()   

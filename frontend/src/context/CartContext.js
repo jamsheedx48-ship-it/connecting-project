@@ -1,8 +1,9 @@
-import {  createContext, useEffect, useState } from "react";
+import {  createContext, useContext, useEffect, useState } from "react";
 import {  useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Swal from 'sweetalert2';
 import API from "../api/axios";
+import { AuthContext } from "./AuthContext";
 
 export const CartContext=createContext()
 
@@ -10,11 +11,18 @@ export const CartContext=createContext()
 export const CartProvider=({children})=>{
 
     const navigate=useNavigate()
-    const token= localStorage.getItem("token")
-     const [cart,setCart]=useState([])
+    const {user} =useContext(AuthContext)
+     const [cart,setCart]=useState(
+        JSON.parse(localStorage.getItem("cart"))||[]
+     )
+
 
     useEffect(()=>{
-        if(!token)return
+        if(!user){
+        setCart([])
+        localStorage.removeItem("cart")
+        return;
+        }
         const getCart=async ()=>{
             try{
                 const res= await API.get("/cart/")
@@ -27,11 +35,25 @@ export const CartProvider=({children})=>{
             }
         }
         getCart()
-},[token])
-   
+},[user])
+    
+    useEffect(()=>{
+        localStorage.setItem("cart",JSON.stringify(cart))
+    },[cart])
+    useEffect(()=>{
+        const handleStorage=(event)=>{
+            if(event.key==="cart"){
+                const updatedCart=
+                JSON.parse(localStorage.getItem("cart"))||[]
+                setCart(updatedCart)
+            }
+        }
+        window.addEventListener("storage",handleStorage);
+        return()=>window.removeEventListener("storage",handleStorage)
+    },[])
 
     const addTocart= async (product)=>{
-        if(!token){
+        if(!user){
   Swal.fire({
     title: "Error!",
     text: "Please login to continue",
@@ -167,7 +189,7 @@ export const CartProvider=({children})=>{
 
     const BuySingleProduct= async (product)=>{
         
-       if (!token){
+       if (!user){
         Swal.fire({
             title:"Error!",
             text:"Please login to continue",
@@ -207,7 +229,7 @@ export const CartProvider=({children})=>{
     }
 
     const PayForAll= async ()=>{
-        if(!token){
+        if(!user){
             Swal.fire({
                 title:"Error!",
                 text:"Please login to continue",

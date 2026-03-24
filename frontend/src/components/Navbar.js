@@ -1,32 +1,28 @@
-import React, { useEffect,useState } from 'react'
 import "./css/Navbar.css"
 import { Link, useNavigate } from 'react-router-dom'
 import { useContext } from 'react'
 import { CartContext } from '../context/CartContext'
 import { Button } from 'react-bootstrap'
 import Swal from 'sweetalert2';
-import API from '../api/axios'
 import { toast } from 'react-toastify'
+import { AuthContext } from '../context/AuthContext'
 
 const Navbar = () => {
-  const [userid,setUserid]=useState(localStorage.getItem("userId"))
-  const [name,setName]=useState(localStorage.getItem("username")||"")
-  const token=localStorage.getItem('token')
- useEffect(()=>{
-   const token= localStorage.getItem("token")
-   if (token){
-    API.get("/accounts/user/")
-    .then((res)=>{
-      setName(res.data.username)
-      setUserid(res.data.id)
-      localStorage.setItem("userId",res.data.id)
-    })
-    .catch((err)=>{
-      console.log(err);
+  const { user, logout } = useContext(AuthContext);
+//  useEffect(()=>{
+//    const token= localStorage.getItem("token")
+//    if (token){
+//     API.get("/accounts/user/")
+//     .then((res)=>{
+//       setName(res.data.username)
+//       setUserid(res.data.id)
+//     })
+//     .catch((err)=>{
+//       console.log(err);
       
-    })
-   }
- },[])
+//     })
+//    }
+//  },[])
 
   const {cart,setCart}=useContext(CartContext)
   const handleCart=()=>{
@@ -50,15 +46,9 @@ const Navbar = () => {
   cancelButtonText: "Cancel"
 }).then((res)=>{
   if(res.isConfirmed){
-    localStorage.removeItem("userId")
-    localStorage.removeItem("token")
-    localStorage.removeItem("refresh")
-    localStorage.removeItem("username")
-    setUserid(null)
-    setName("")
+    logout()
     setCart([])
-    navigate("/")
-    toast.success("Logout succesful")
+    toast.success("Logout successful")
   }
 
 })
@@ -82,9 +72,9 @@ const Navbar = () => {
         </ul>
 
         <div className='login-cart'>
-          {token ?(
+          {user ?(
             <>
-            <Button variant='outline-secondary'>HI, {name}</Button>
+            <Button variant='outline-secondary'>HI, {user}</Button>
             <button className='btnlogin' onClick={handleLogout}>Logout</button>
             </>
           ):(

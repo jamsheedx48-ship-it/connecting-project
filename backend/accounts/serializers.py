@@ -57,11 +57,12 @@ class RegisterSerializer(serializers.ModelSerializer):
             )
         return data
 
-    def create(self, validated_data):
-        validated_data.pop("confirm_password")
+    # def create(self, validated_data):
+    #     print(validated_data)
+    #     validated_data.pop("confirm_password")
 
-        user=User.objects.create_user(**validated_data)    
-        return user
+    #     user=User.objects.create_user(**validated_data)    
+    #     return user
     
 class LoginSerializer(serializers.Serializer):
     email=serializers.EmailField()
@@ -80,7 +81,7 @@ class LoginSerializer(serializers.Serializer):
         if not user.is_active:
             raise serializers.ValidationError("Your account has been blocked by admin")
         
-        user=authenticate(email=email,password=password)
+        user=authenticate(username=email,password=password)
 
         if user is None:
             raise serializers.ValidationError('Invalid credentials')
@@ -99,3 +100,48 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model=User
         fields= ["id",'username','email']        
+
+
+class VerifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    otp = serializers.CharField()
+
+    # 🔹 Username validation (same as Register)
+    def validate_username(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Enter a valid name")
+
+        if len(value) < 3:
+            raise serializers.ValidationError(
+                "Username must be at least 3 characters"
+            )
+
+        if not re.match(r'^[A-Za-z0-9_]+$', value):
+            raise serializers.ValidationError(
+                "Username can only contain letters, numbers and underscore"
+            )
+
+        return value
+
+    # 🔹 Password validation (same as Register)
+    def validate_password(self, value):
+        password_pattern = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$'
+
+        if not re.match(password_pattern, value):
+            raise serializers.ValidationError(
+                "Password must contain uppercase, lowercase, number and be at least 8 characters"
+            )
+
+        return value
+
+    #  OTP validation 
+    def validate_otp(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError("OTP must contain only digits")
+
+        if len(value) != 6:
+            raise serializers.ValidationError("OTP must be 6 digits")
+
+        return value        

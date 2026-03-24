@@ -1,12 +1,15 @@
-import React, {useState } from 'react'
+import React, {useContext, useState } from 'react'
 import { useNavigate,Link, } from 'react-router-dom'
 import { toast } from 'react-toastify';
 import "./css/Reg.css"
 import API from '../api/axios';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { AuthContext } from '../context/AuthContext';
 
 const Login = () => {
   const navigate=useNavigate()
+  const {login}=useContext(AuthContext)
+  
   const[email,setEmail]=useState("")
   const[password,setPassword]=useState("")
   const[showPassword,setShowPassword]=useState(false)
@@ -33,12 +36,11 @@ const Login = () => {
         password:password
       }
     )
+    console.log("res",res.data);
+    
     toast.success("Login successful")
-    localStorage.setItem("token",res.data.access)
-    localStorage.setItem("username",res.data.username)
-    localStorage.setItem("refresh",res.data.refresh)
+    login(res.data);
     navigate("/")
-    window.location.reload()
 
 
    }catch(error){

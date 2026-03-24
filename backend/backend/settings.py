@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'accounts',
     'products',
     'cart',
-    'orders',
+    'orders.apps.OrdersConfig',
+    'admin_panel',
 ]
 
 MIDDLEWARE = [
@@ -137,8 +138,15 @@ REST_FRAMEWORK = {
     ],
 }
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), 
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10), 
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),   
 }
 
 AUTH_USER_MODEL = 'accounts.User'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'jamsheed.x48@gmail.com'
+EMAIL_HOST_PASSWORD = 'anifojewkiuxqpus'

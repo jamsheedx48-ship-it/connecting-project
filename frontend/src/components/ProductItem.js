@@ -23,7 +23,8 @@ const ProductItem = () => {
        useEffect(()=>{
         const getProducts=async ()=>{
           try{
-            const res= await API.get("/products/")
+            const res= await API.get("products/")
+            
             setProduct(res.data)
             setLoading(false)
             const uniqueCategory=[
