@@ -1,0 +1,91 @@
+/* 🌍 Page Container */
+.wallet-container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+/* 💰 Balance Card */
+.wallet-balance {
+  background: #000;
+  color: #fff;
+  padding: 25px;
+  border-radius: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.wallet-balance h2 {
+  font-size: 14px;
+  opacity: 0.7;
+  margin-bottom: 10px;
+}
+
+.wallet-balance h1 {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+/* 📜 Transactions Section */
+.wallet-transactions h2 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+/* 📦 Transaction Card */
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #eee;
+  padding: 15px;
+  border-radius: 15px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.transaction-item:hover {
+  background: #fafafa;
+  transform: translateY(-2px);
+}
+
+/* 📝 Left Content */
+.transaction-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.transaction-info p {
+  margin: 0;
+}
+
+.transaction-date {
+  font-size: 12px;
+  color: #888;
+  margin-top: 5px;
+}
+
+/* 💸 Amount */
+.transaction-amount {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* ✅ Credit (green) */
+.credit {
+  color: #16a34a;
+}
+
+/* ❌ Debit (red) */
+.debit {
+  color: #dc2626;
+}
+
+/* 🚫 Empty state */
+.no-transactions {
+  color: #777;
+  text-align: center;
+  margin-top: 20px;
+}

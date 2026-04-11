@@ -1,12 +1,24 @@
 .admin-layout {
-  display: flex;
-  width: 100%;
-  
+  display: block; /* ❗ NOT flex */
 }
 
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background-color: #000;
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: 20px;
+  z-index: 1000; /* 🔥 IMPORTANT */
+}
+
+/* Main content */
 .admin-content {
-  flex: 1; 
-  padding-left: 270px;
+  margin-left: 220px;
+  padding: 25px;
   background-color: #f8f9fa;
-  
+  min-height: 100vh;
 }

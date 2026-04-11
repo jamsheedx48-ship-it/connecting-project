@@ -7,55 +7,46 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  ResponsiveContainer
+  ResponsiveContainer 
 } from "recharts";
+import AdminAPI from '../api/adminAPI';
 
 const AdminDashboard = () => {
-  const [products, setProducts] = useState([])
-  const [orders, setOrders] = useState([])
-  const [users, setUsers] = useState([])
+ const [loading, setLoading] = useState(true);
+ const [stats,setStats]=useState({
+  products:0,
+  orders:0,
+  users:0
+ })
+ const [monthlySales, setMonthlySales] = useState([]);
 
   useEffect(() => {
-    fetch(`https://json-server-ecommerce-t2t5.onrender.com/products`)
-      .then((res) => res.json())
-      .then((data) => setProducts(data))
-
-    fetch(`https://json-server-ecommerce-t2t5.onrender.com/orders`)
-      .then((res) => res.json())
-      .then((data) => setOrders(data))
-
-    fetch(`https://json-server-ecommerce-t2t5.onrender.com/users`)
-      .then((res) => res.json())
-      .then((data) => setUsers(data))
+    fetchDashboard()
   }, [])
-  
-  // Function to calculate monthly sales
-  const getMonthlySales = () => {
-    const monthlySalesMap = {}
 
-    orders.forEach(order => {
-      if (order.status !== "paid") return; // only paid orders
-
-      const date = new Date(order.date)
-      const month = date.toLocaleString("default", { month: "short" }) // Jan, Feb...
-      const year = date.getFullYear()
-      const key = `${month} ${year}`
-
-      if (!monthlySalesMap[key]) monthlySalesMap[key] = 0
-      monthlySalesMap[key] += Number(order.total)
-    })
-
-    // convert to array for chart
-    return Object.keys(monthlySalesMap).map(month => ({
-      month,
-      sales: monthlySalesMap[month]
-    }))
+  const fetchDashboard =async ()=>{
+    try{
+      const res= await AdminAPI.get("dashboard/")
+      setStats({
+        products:res.data.total_products,
+        orders:res.data.total_orders,
+        users:res.data.total_users
+      })
+      setMonthlySales(res.data.monthly_sales||[])
+    }catch(error){
+      console.log(error);
+      
+    }finally{
+      setLoading(false)
+    }
   }
-
-  const monthlySales = getMonthlySales()
   
-
+ 
+  if (loading) {
+    return <h3 className="text-center mt-5">Loading...</h3>;
+  }
   return (
+    
     <div className='container my-4 text-center'>
       <h2 className='mb-4 text-center fw-bold'>Dashboard Overview</h2>
 
@@ -63,38 +54,47 @@ const AdminDashboard = () => {
         <Col md={4}>
           <Card className='text-center shadow-sm p-3'>
             <h5>Total Products</h5>
-            <h3>{products.length}</h3>
+            <h3>{stats.products}</h3>
           </Card>
         </Col>
 
         <Col md={4}>
           <Card className='text-center shadow-sm p-3'>
             <h5>Total Orders</h5>
-            <h3>{orders.length}</h3>
+            <h3>{stats.orders}</h3>
           </Card>
         </Col>
 
         <Col md={4}>
           <Card className='text-center shadow-sm p-3'>
             <h5>Total Users</h5>
-            <h3>{users.length}</h3>
+            <h3>{stats.users}</h3>
           </Card>
         </Col>
       </Row>
 
-      <Row className='mb-4'>
+      {/* 📈 MONTHLY SALES CHART */}
+      <Row>
         <Col>
-          <Card className='shadow-sm p-3'>
-            <h5 className='mb-3'>Monthly Sales</h5>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlySales} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <Card className='shadow-sm p-4 border-0'>
+            <h5 className='mb-3 fw-semibold'>Monthly Sales</h5>
+
+            {monthlySales.length === 0?(
+              <p>No Sales data available</p>
+            ):(
+              <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={monthlySales}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="sales" fill="#8884d8" />
+
+                {/* Nike style black bar */}
+                <Bar dataKey="sales" fill="#83dc82" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+            )}
+
           </Card>
         </Col>
       </Row>

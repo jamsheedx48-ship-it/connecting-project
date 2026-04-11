@@ -3,13 +3,15 @@ import {  useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Swal from 'sweetalert2';
 import API from "../api/axios";
+import { useLocation } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 
 export const CartContext=createContext()
 
 
-export const CartProvider=({children})=>{
 
+export const CartProvider=({children})=>{
+    const location = useLocation();
     const navigate=useNavigate()
     const {user} =useContext(AuthContext)
      const [cart,setCart]=useState(
@@ -23,6 +25,15 @@ export const CartProvider=({children})=>{
         localStorage.removeItem("cart")
         return;
         }
+            const isAdminPage = location.pathname.startsWith("/adminpanel");
+
+    if (isAdminPage) return; // 🚫 stop in admin
+
+    if (!user) {
+        setCart([]);
+        localStorage.removeItem("cart");
+        return;
+    }
         const getCart=async ()=>{
             try{
                 const res= await API.get("/cart/")
@@ -35,7 +46,7 @@ export const CartProvider=({children})=>{
             }
         }
         getCart()
-},[user])
+},[user,location.pathname])
     
     useEffect(()=>{
         localStorage.setItem("cart",JSON.stringify(cart))
@@ -187,73 +198,49 @@ export const CartProvider=({children})=>{
 
     }
 
-    const BuySingleProduct= async (product)=>{
-        
-       if (!user){
+    const BuySingleProduct = (product) => {
+
+  if (!user) {
+    Swal.fire({
+      title: "Error!",
+      text: "Please login to continue",
+      icon: "error",
+    }).then((result) => {
+      if (result.isConfirmed) navigate("/login");
+    });
+    return;
+  }
+
+  // send product data to payment page
+  navigate("/payment", {
+    state: {
+      buyNowProduct: {
+        id: product.product || product.id,
+        name: product.name,
+        price: product.price,
+        quantity: product.quantity || 1,
+      }
+    }
+  });
+};
+
+const PayForAll = async () => {
+    if (!user) {
         Swal.fire({
-            title:"Error!",
-            text:"Please login to continue",
-            icon:"error",
-            confirmButtonText: "OK"
-        })
-        .then((result)=>{
-            if(result.isConfirmed){
-                navigate('/login')
+            title: "Error!",
+            text: "Please login to continue",
+            icon: "error"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                navigate("/login");
             }
         });
         return;
-        
-       }
-
-
-       try{
-        const res= await API.post("/orders/buy-now/",{
-            "product_id":product.product || product.id,
-            "quantity":product.quantity
-        })
-    setCart(prev=>prev.filter(item=>item.id!==product.id))
-        navigate(`/payment/${res.data.order_id}`)
-       }
-       catch(err){
-        console.log(err);
-        Swal.fire({
-            title:"Error!",
-            text:"Order creation failed",
-            icon:"error"
-        });
-        
-       }
-
-
-       
     }
 
-    const PayForAll= async ()=>{
-        if(!user){
-            Swal.fire({
-                title:"Error!",
-                text:"Please login to continue",
-                icon:"error"
-            }).then((result)=>{
-                if(result.isConfirmed){
-                    navigate("/login")
-                }
-            })
-            return
-        }
-        try{
-            const res=await API.post("/orders/create/")
-            const order_id=res.data.order_id
-            navigate(`/payment/${order_id}`)
-        }
-        catch(err){
-            console.log(err);
-            toast.error("Failed to create order")
-            
-        }
-   
-       
-    }
+    
+    navigate("/payment")
+};
 
 
     return(

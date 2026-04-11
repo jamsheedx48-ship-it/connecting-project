@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from .models import Product
-from .serializers import ProductSerializer
+from .models import Product,Category
+from .serializers import ProductSerializer,CategorySerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -11,7 +11,7 @@ class ProductListView(APIView):
     permission_classes=[AllowAny]
     
     def get(self,request):
-        products = Product.objects.all()
+        products = Product.objects.filter(is_deleted=False)
         serializer = ProductSerializer(products,many=True)
         return Response(serializer.data)
     
@@ -36,3 +36,10 @@ class ProductDeatilView(APIView):
             )
         serializer=ProductSerializer(product)
         return Response(serializer.data)    
+    
+class CategoryListCreateView(APIView):
+
+    def get(self, request):
+        categories = Category.objects.all()
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data)

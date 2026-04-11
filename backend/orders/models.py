@@ -17,12 +17,23 @@ class Order(models.Model):
         ("COD","Cash On Delivery"),
         ("UPI","UPI"),
         ("CARD","CARD"),
+        ("WALLET","WALLET"),
     ]
     user= models.ForeignKey(User,on_delete=models.CASCADE)
 
     status= models.CharField(max_length=20,default="pending",choices=STATUS_CHOICES)
     payment_method=models.CharField(max_length=20,choices=PAYMENT_METHODS)
-
+    payment_channel = models.CharField(max_length=20,null=True,blank=True)
+    payment_status = models.CharField(
+    max_length=20,
+    choices=[
+        ("pending", "Pending"),
+        ("paid", "Paid"),
+        ("failed", "Failed"),
+        ("refunded", "Refunded"),
+    ],
+    default="pending"
+)
     #address
     name=models.CharField(max_length=100,null=True,blank=True)
     address=models.TextField(null=True,blank=True)

@@ -57,12 +57,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             )
         return data
 
-    # def create(self, validated_data):
-    #     print(validated_data)
-    #     validated_data.pop("confirm_password")
-
-    #     user=User.objects.create_user(**validated_data)    
-    #     return user
+    
     
 class LoginSerializer(serializers.Serializer):
     email=serializers.EmailField()
@@ -80,6 +75,7 @@ class LoginSerializer(serializers.Serializer):
 
         if not user.is_active:
             raise serializers.ValidationError("Your account has been blocked by admin")
+        
         
         user=authenticate(username=email,password=password)
 

@@ -1,0 +1,26 @@
+.status-dropdown {
+  border: none;
+  outline: none;
+  font-weight: 600;
+  background: transparent;
+}
+
+.status-pending {
+  color: orange;
+}
+
+.status-processing {
+  color: blue;
+}
+
+.status-shipped {
+  color: purple;
+}
+
+.status-delivered {
+  color: green;
+}
+
+.status-cancelled {
+  color: red;
+}

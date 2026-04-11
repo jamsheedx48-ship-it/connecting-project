@@ -8,6 +8,11 @@ from .models import Order,OrderItem
 from products.models import Product
 from rest_framework import status
 from .serializers import OrderSerializer
+import razorpay
+from django.conf import settings
+import hmac,hashlib
+from wallet.models import Wallet, WalletTransaction
+
 # Create your views here.
 
 class CreateOrderView(APIView):
@@ -30,7 +35,7 @@ class CreateOrderView(APIView):
                    )
          
          total_price=0
-         order= Order.objects.create(user=user,total_price=0)
+         order= Order.objects.create(user=user,total_price=0,payment_status="pending")
         
          for item in cart_items:
               price= item.product.price * item.quantity
@@ -71,7 +76,8 @@ class BuyNowView(APIView):
           total_price=product.price*quantity
           order=Order.objects.create(
                user=user,
-               total_price=total_price
+               total_price=total_price,
+               payment_status="pending"
           )
 
           OrderItem.objects.create(
@@ -136,7 +142,10 @@ class CancelOrderView(APIView):
 
      def post(self,request,order_id):
           order=get_object_or_404(Order,id=order_id,user=request.user)
-
+          
+          if order.payment_status == "refunded":
+            return Response({"error": "Already refunded"}, status=400)
+          
           if order.status=="cancelled":
                return Response({"error":"Order already cancelled"}) 
           
@@ -145,6 +154,129 @@ class CancelOrderView(APIView):
                return Response({"error":"Delivered order cannot be cancelled"},status=status.HTTP_400_BAD_REQUEST)
           
 
-          order.status="cancelled"   
-          order.save()   
-          return Response({"message":"Order cancelled successfully"})
+          order.status="cancelled"
+
+          refunded=False
+          if order.payment_status == "paid":
+               if order.payment_method=="COD":
+                    order.payment_status="pending"
+                    order.save()
+                    return Response({
+                         "message":"COD order cancelled (no refund needed)"
+                    })  
+
+               wallet, _ = Wallet.objects.get_or_create(user=request.user)
+               wallet.balance += order.total_price
+               wallet.save()
+
+               WalletTransaction.objects.create(
+                    user=request.user,
+                    amount=order.total_price,
+                    transaction_type="credit",
+                    description=f"Refund for order #{order.id}"
+               )
+               order.payment_status="refunded"
+               refunded=True
+
+          order.save()    
+          return Response({
+              "message": "Order cancelled successfully",
+              "refunded": refunded
+          })     
+     
+
+client=razorpay.Client(auth=(settings.RAZORPAY_KEY_ID,settings.RAZORPAY_KEY_SECRET))
+
+class CreateRazorpayOrder(APIView):
+    def post(self, request):
+        amount = request.data.get("amount")  # in rupees
+        
+        if not amount:
+             return Response({"error":"Amount is required"},status=status.HTTP_400_BAD_REQUEST)
+        try:
+             amount=float(amount)
+        except ValueError:
+             return Response({"error":"Invalid amount"},status=status.HTTP_400_BAD_REQUEST)     
+        order_data = {
+            "amount": int(amount * 100),  # paise
+            "currency": "INR",
+            "payment_capture": 1
+        }
+
+        razorpay_order = client.order.create(order_data)
+
+        return Response({
+            "order_id": razorpay_order["id"],
+            "amount": amount
+        })
+
+class VerifyPayment(APIView): 
+     def post(self, request):
+         print("VERIFY API HIT")
+         data = request.data
+ 
+         razorpay_order_id = data.get("razorpay_order_id")
+         payment_id = data.get("razorpay_payment_id")
+         signature = data.get("razorpay_signature")
+         db_order_id = data.get("order_id")
+ 
+         order = get_object_or_404(Order, id=db_order_id)
+         if order.payment_status == "paid":
+             return Response({"message": "Already paid"})
+             
+ 
+         # ✅ Verify signature
+         print("RAZORPAY ORDER ID:", razorpay_order_id)
+         print("PAYMENT ID:", payment_id)
+         print("SIGNATURE:", signature)
+         generated_signature = hmac.new(
+             bytes(settings.RAZORPAY_KEY_SECRET, 'utf-8'),
+             bytes(razorpay_order_id + "|" + payment_id, 'utf-8'),
+             hashlib.sha256
+         ).hexdigest()
+         print("GENERATED SIGNATURE:", generated_signature)
+         print("MATCH:", generated_signature == signature)
+ 
+         if generated_signature == signature:
+ 
+
+             # ✅ Fetch Razorpay payment
+             payment = client.payment.fetch(payment_id)
+ 
+             # ✅ Save actual method
+             order.payment_channel = payment.get("method")  # upi/card/netbanking
+ 
+             # ✅ Update status
+             order.status = "processing"
+             order.payment_status="paid"
+ 
+             order.save()
+ 
+             # ✅ Clear cart
+             cart = Cart.objects.filter(user=order.user).first()
+             if cart:
+                 CartItem.objects.filter(cart=cart).delete()
+
+             return Response({"status": "success"})
+        
+         order.payment_status = "failed"
+         order.status = "pending"
+         order.save()    
+         return Response({"status": "failed"})
+
+class PaymentFailedView(APIView):
+    def post(self, request):
+        print("PAYMENT FAILED API HIT", request.data)
+        order = Order.objects.get(id=request.data["order_id"])
+        print("ORDER BEFORE:", order.payment_status)
+
+        if order.payment_status == "paid":
+            return Response({"message": "Already paid"})
+
+        order.payment_status = "failed"
+        order.status = "pending"
+        order.save()
+        print("ORDER AFTER:", order.payment_status)  
+
+
+        return Response({"message": "Payment marked as failed"})

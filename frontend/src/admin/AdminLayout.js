@@ -5,14 +5,13 @@ import { Outlet } from 'react-router-dom'
 
 const AdminLayout = () => {
   return (
-   <div className="admin-layout">
-      <Admin/>
+    <div className="admin-layout">
+      <Admin />
 
       <div className="admin-content">
-        <Outlet /> 
+        <Outlet />
       </div>
     </div>
-
   )
 }
 

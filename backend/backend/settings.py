@@ -44,7 +44,10 @@ INSTALLED_APPS = [
     'products',
     'cart',
     'orders.apps.OrdersConfig',
+    'cloudinary',
+    'cloudinary_storage',
     'admin_panel',
+    'wallet',
 ]
 
 MIDDLEWARE = [
@@ -56,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.middleware.DisableCacheMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -150,3 +154,16 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'jamsheed.x48@gmail.com'
 EMAIL_HOST_PASSWORD = 'anifojewkiuxqpus'
+
+import cloudinary
+
+cloudinary.config(
+    cloud_name="dryz2cykr",
+    api_key="677787428412932",
+    api_secret="6DA49r6c6jhiXr2KGlcICz5xjWs"
+)
+
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+RAZORPAY_KEY_ID = "rzp_test_SWKCCTluNoYQ9W"
+RAZORPAY_KEY_SECRET = "BBnMSzXb2CygrF9IHBJ4RIHy"

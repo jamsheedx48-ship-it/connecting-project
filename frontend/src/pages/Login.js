@@ -1,4 +1,4 @@
-import React, {useContext, useState } from 'react'
+import React, {useContext, useState,useEffect } from 'react'
 import { useNavigate,Link, } from 'react-router-dom'
 import { toast } from 'react-toastify';
 import "./css/Reg.css"
@@ -13,7 +13,15 @@ const Login = () => {
   const[email,setEmail]=useState("")
   const[password,setPassword]=useState("")
   const[showPassword,setShowPassword]=useState(false)
-
+  useEffect(() => {
+    const msg = localStorage.getItem("flashMessage");
+    if (msg) {
+        localStorage.removeItem("flashMessage");
+        setTimeout(() => {
+            toast.error(msg);
+        }, 300);
+    }
+}, []);
   const LoginValidation= async (e)=>{
    e.preventDefault()
 

@@ -3,10 +3,16 @@ from .models import Order,OrderItem
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name=serializers.CharField(source="product.name",read_only=True)
-    product_image=serializers.CharField(source="product.image",read_only=True)
+    product_image=serializers.SerializerMethodField(source="product.image",read_only=True)
     class Meta:
         model=OrderItem
         fields = ["id","product_name","product_image","quantity","price"]
+
+    def get_product_image(self, obj):
+        if obj.product.image:
+            return obj.product.image.url   #  Cloudinary URL
+        return None    
+
 
 class OrderSerializer(serializers.ModelSerializer):
     items=OrderItemSerializer(many=True,read_only=True)
